@@ -8,6 +8,6 @@ steps:
 # Deploy container image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
-  args: ['run', 'deploy', 'ips-be', '--image', 'gcr.io/gothic-style-420511/ips-ml', '--region', 'us-central1', '--platform', 'managed', '--port', '5000']
+  args: ['run', 'deploy', 'ips-ml', '--image', 'gcr.io/gothic-style-420511/ips-ml', '--region', 'us-central1', '--platform', 'managed', '--port', '5000']
 images:
 - gcr.io/gothic-style-420511/ips-ml
