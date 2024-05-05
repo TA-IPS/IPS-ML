@@ -150,6 +150,40 @@ def predict_location_rf():
     # Return predicted location
     return jsonify({"predicted_location": predicted_xyz[0]})
 
+@app.route("/rfo", methods=["POST"])
+def predict_location_rfo():
+        # Receive JSON data from POST request
+    request_body = request.get_json()
+    
+    new_data = pd.DataFrame(index=[0])
+
+    # Mengisi nilai-nilai AP yang tidak terdeteksi dengan 0
+    for ap_feature in all_ap_features:
+        new_data[ap_feature] = 0
+
+    # Mengisi nilai-nilai AP yang tidak terdeteksi dengan nilai dari request_body
+    new_data.update(pd.DataFrame.from_dict(request_body, orient='index').transpose())
+
+    # Normalize new data
+    new_data_scaled = scaler.transform(new_data)
+
+    predicted_probabilities = rf_model.predict_proba(new_data_scaled)
+    top_three_indices = np.argsort(predicted_probabilities, axis=1)[:, ::-1][:, :3]
+    top_three_probabilities = np.take_along_axis(predicted_probabilities, top_three_indices, axis=1)
+    predicted_classes = label_encoder.inverse_transform(top_three_indices.flatten())
+    lst = []
+    for i in range(3):
+        predict_object = {}
+        xyz = predicted_classes[i].split(",")
+        predict_object["x"] = xyz[0]
+        predict_object["y"] = xyz[1]
+        predict_object["z"] = xyz[2]
+        predict_object["confidence"] = top_three_probabilities[0,i]
+        lst.append(predict_object)
+
+    # Return predicted location
+    return jsonify({"data": lst})
+
 @app.route("/gnb", methods=["POST"])
 def predict_location_gnb():
         # Receive JSON data from POST request
